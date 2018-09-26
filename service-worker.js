@@ -9,7 +9,7 @@ self.addEventListener('fetch', event => {
         let imageUrl = event.request.url;
 
         // Build up the Cloundinary URL
-        const cloudinaryUrl = 'https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}';
+        const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;
 
         // Try and fetch the image
         event.respondWith(
