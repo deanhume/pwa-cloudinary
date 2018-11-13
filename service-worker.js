@@ -22,17 +22,18 @@ function fetchCloudinaryImage(imageUrl){
     // Build up the Cloundinary URL
     const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;    
     
-    return fetch(cloudinaryUrl, response => {
-        if (!response.ok){
-            // We failed return original image
-            console.log(response.ok);
-        }
+    // return fetch(cloudinaryUrl, response => {
+    //     if (!response.ok){
+    //         // We failed return original image
+    //         console.log(response.ok);
+    //     }
 
-        return response;
-    }).catch(error => {
-        console.log(error);
-    })
+    //     return response;
+    // }).catch(error => {
+    //     console.log(error);
+    // })
 
+    return fetch(cloudinaryUrl).then(response => console.log(response.ok));
 }
 
 self.addEventListener('fetch', event => {
