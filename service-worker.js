@@ -12,13 +12,16 @@ self.addEventListener('fetch', event => {
         const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;
 
         // Try and fetch the image
-        event.respondWith(
+        return event.respondWith(
             fetch(cloudinaryUrl, response => {
                 if (!response.ok){
                     // We failed return original image
+                    console.log(response.ok);
                 }
 
                 return response;
+            }).catch(error => {
+                console.log(error);
             })
         );
 
