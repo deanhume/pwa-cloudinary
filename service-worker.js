@@ -1,39 +1,36 @@
 "use strict";
 
 /**
- * Force a timeout if we go beyond given time period
- * @param {int} delay 
- */
-function timeout(delay) {
-    return new Promise(function(resolve, reject) {
-        setTimeout(function(){
-          resolve();
-        }, delay);
-    });
-}
-
-/**
  * Fetch the image from Cloudinary and
  * fail if there are any errors.
  * @param {string} imageUrl 
+ * @param {object} originalRequest 
  */
-function fetchCloudinaryImage(imageUrl){
+function fetchCloudinaryImage(imageUrl, originalRequest) {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     // Build up the Cloundinary URL
-    const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;    
-    
-    // return fetch(cloudinaryUrl, response => {
-    //     if (!response.ok){
-    //         // We failed return original image
-    //         console.log(response.ok);
-    //     }
+    const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;
 
-    //     return response;
-    // }).catch(error => {
-    //     console.log(error);
-    // })
+    const fetchPromise = fetch(cloudinaryUrl, { signal });
 
-    return fetch(cloudinaryUrl).then(response => console.log(response.ok));
+    // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    return fetchPromise
+        .then(response => {
+            if (response.ok) {
+                // We failed return original image
+                return originalRequest;
+            }
+            return response;
+        })
+        .catch(error => {
+            // Something went wrong, return original image
+            return originalRequest;
+        });
 }
 
 self.addEventListener('fetch', event => {
@@ -42,7 +39,6 @@ self.addEventListener('fetch', event => {
     if (/\.jpg$|.png$|.gif$/.test(event.request.url)) {
 
         // Try and fetch the image / timeout if too slow
-        event.respondWith(Promise.race([timeout(2000), fetchCloudinaryImage(event.request.url)]));
+        event.respondWith(fetchCloudinaryImage(event.request.url, event.request));
     }
 });
-
