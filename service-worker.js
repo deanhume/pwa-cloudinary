@@ -21,7 +21,7 @@ function fetchCloudinaryImage(imageUrl, originalRequest) {
 
     return fetchPromise
         .then(response => {
-            if (response.ok) {
+            if (!response.ok) {
                 // We failed return original image
                 return originalRequest;
             }
