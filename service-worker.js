@@ -33,6 +33,22 @@ function fetchCloudinaryImage(imageUrl, originalRequest) {
         });
 }
 
+/**
+ * Checks the current device and network to see
+ * if we should return a low quality image instead.
+ * @param {object} request 
+ */
+function shouldReturnLowQuality(request){
+    if ( (request.headers.get('save-data')) // Save Data is on
+    || (navigator.connection.effectiveType.match(/2g/)) // Looks like a 2G connection
+    || (navigator.deviceMemory < 1) // We have less than 1G of RAM
+    ){
+        return true;
+    }
+    
+    return false;
+}
+
 self.addEventListener('fetch', event => {
 
     // Check if the request is for an image
