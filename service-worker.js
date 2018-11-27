@@ -4,15 +4,16 @@
  * Fetch the image from Cloudinary and
  * fail if there are any errors.
  * @param {string} imageUrl 
- * @param {object} originalRequest 
+ * @param {int} imageQuality 
  */
-function fetchCloudinaryImage(imageUrl, originalRequest) {
+function fetchCloudinaryImage(imageUrl, imageQuality) {
 
     const controller = new AbortController();
     const signal = controller.signal;
 
     // Build up the Cloundinary URL
-    const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/q_auto,f_auto/${imageUrl}`;
+    const imageQualityString = `q_${imageQuality}`
+    const cloudinaryUrl = `https://res.cloudinary.com/hume/image/fetch/${imageQualityString},f_auto/${imageUrl}`;
 
     const fetchPromise = fetch(cloudinaryUrl, { signal });
 
@@ -23,13 +24,13 @@ function fetchCloudinaryImage(imageUrl, originalRequest) {
         .then(response => {
             if (!response.ok) {
                 // We failed return original image
-                return originalRequest;
+                return fetch(imageUrl);
             }
             return response;
         })
-        .catch(error => {
+        .catch(() => {
             // Something went wrong, return original image
-            return originalRequest;
+            return fetch(imageUrl);
         });
 }
 
@@ -38,23 +39,30 @@ function fetchCloudinaryImage(imageUrl, originalRequest) {
  * if we should return a low quality image instead.
  * @param {object} request 
  */
-function shouldReturnLowQuality(request){
-    if ( (request.headers.get('save-data')) // Save Data is on
-    || (navigator.connection.effectiveType.match(/2g/)) // Looks like a 2G connection
-    || (navigator.deviceMemory < 1) // We have less than 1G of RAM
-    ){
+function shouldReturnLowQuality(request) {
+    if ((request.headers.get('save-data')) // Save Data is on
+        || (navigator.connection.effectiveType.match(/2g/)) // Looks like a 2G connection
+        || (navigator.deviceMemory < 1) // We have less than 1G of RAM
+    ) {
         return true;
     }
-    
+
     return false;
 }
 
 self.addEventListener('fetch', event => {
 
-    // Check if the request is for an image
-    if (/\.jpg$|.png$|.gif$/.test(event.request.url)) {
+    const request = event.request;
+    const url = event.request.url;
 
-        // Try and fetch the image / timeout if too slow
-        event.respondWith(fetchCloudinaryImage(event.request.url, event.request));
+    // Check if the request is for an image
+    if (/\.jpg$|.png$|.gif$/.test(url)) {
+        if (shouldReturnLowQuality(request)) {
+            // Fetch a really low quality version of the image
+            event.respondWith(fetchCloudinaryImage(url, 1));
+        } else {
+            // Try and fetch the image from Cloundinary / timeout if too slow
+            event.respondWith(fetchCloudinaryImage(url, 80));
+        }
     }
 });
