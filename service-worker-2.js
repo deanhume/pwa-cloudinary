@@ -5,16 +5,16 @@ const offlineUrl = '/offline/';
 /**
  * The event listener for the service worker installation
  */
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(cacheName)
-            .then(cache => cache.addAll([
-                './assets/font/beyond_the_mountains.ttf',
-                './assets/font/icons.woff2',
-                offlineUrl
-            ]))
-    );
-});
+// self.addEventListener('install', event => {
+//     event.waitUntil(
+//         caches.open(cacheName)
+//             .then(cache => cache.addAll([
+//                 './assets/font/beyond_the_mountains.ttf',
+//                 './assets/font/icons.woff2',
+//                 offlineUrl
+//             ]))
+//     );
+// });
 
 /**
  * Is the current request for an HTML page?
